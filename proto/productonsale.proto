@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package productpnsale;
+
+option go_package = "github.com/sys-internals/example-grpc/proto/product";
+
+service ProductService {
+  rpc CreateProductOnSale (ProductOnSale) returns (CreateProductOnSaleResponse) {}
+  rpc GetProductsOnSale (GetProductsOnSaleRequest) returns (GetProductsOnSaleResponse) {}
+}
+
+message ProductOnSale {
+  int32 idProductOnSale = 1;
+  string title = 2;
+  Product product = 3;
+  int32 price = 4;
+  string saleStartDatetime = 5;
+  string saleEndDatetime = 6;
+  Catalog catalog = 7;
+}
+
+message Product {
+    int32 idProduct = 1;
+    string name = 2;
+    string description = 3;
+    Enterprise enterprise = 4;
+}
+
+message Enterprise {
+  int32 idEnterprise = 1;
+  string name = 2;
+}
+
+message Catalog {
+  int32 idProductCatalog = 1;
+  string name = 2;
+}
+
+message CreateProductOnSaleResponse {
+  int32 code = 1;
+  string message = 2;
+}
+
+message GetProductsOnSaleRequest {
+
+}
+
+message GetProductsOnSaleResponse {
+  int32 code = 1;
+  string message = 2;
+}
+
+message ProductOnSaleList {
+  repeated ProductOnSale productOnSale = 1; 
+}
+
+

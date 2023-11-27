@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package catalog;
+
+option go_package = "github.com/sys-internals/example-grpc/proto/catalog";
+
+service CatalogService {
+    rpc CreateCatalog (CreateCatalogRequest) returns (Catalog) {}
+    rpc GetCatalog (GetCatalogRequest) returns (GetCatalogResponse) {}
+}
+
+message Catalog {
+    int32 id = 1;
+    string name = 2;
+}
+
+message CreateCatalogRequest {
+    string name = 1;
+}
+
+message CreateCatalogResponse {
+    int32 id = 1;
+    string name = 2;
+}
+
+message GetCatalogRequest {
+
+}
+
+message GetCatalogResponse {
+    repeated Catalog catalog = 1;
+}

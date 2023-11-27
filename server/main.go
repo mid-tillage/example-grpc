@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 
+	_ "github.com/lib/pq"
 	"google.golang.org/grpc"
 
 	pb "github.com/sys-internals/example-grpc/catalog"
@@ -23,24 +24,23 @@ const (
 // YourCatalogServiceServer implements the CatalogServiceServer interface
 type YourCatalogServiceServer struct {
 	db *sql.DB
+	pb.UnimplementedCatalogServiceServer
 }
 
-// Accept implements net.Listener.
-func (*YourCatalogServiceServer) Accept() (net.Conn, error) {
-	panic("unimplemented")
-}
+// // NewCatalogServiceServer creates a new instance of YourCatalogServiceServer
+// func NewCatalogServiceServer() (*YourCatalogServiceServer, error) {
+// 	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+// 		dbHost, dbPort, dbUser, dbPassword, dbName)
 
-// Addr implements net.Listener.
-func (*YourCatalogServiceServer) Addr() net.Addr {
-	panic("unimplemented")
-}
+// 	db, err := sql.Open("postgres", connStr)
+// 	if err != nil {
+// 		log.Fatalf("Failed to connect to the database: %v", err)
+// 		return nil, err
+// 	}
 
-// Close implements net.Listener.
-func (*YourCatalogServiceServer) Close() error {
-	panic("unimplemented")
-}
+// 	return &YourCatalogServiceServer{db: db}, nil
+// }
 
-// NewCatalogServiceServer creates a new instance of YourCatalogServiceServer
 func NewCatalogServiceServer() (*YourCatalogServiceServer, error) {
 	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		dbHost, dbPort, dbUser, dbPassword, dbName)
@@ -112,7 +112,25 @@ func (s *YourCatalogServiceServer) GetCatalog(ctx context.Context, req *pb.GetCa
 	}, nil
 }
 
-// Initialize gRPC server
+// // Initialize gRPC server
+// func main() {
+// 	// database_url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", dbName, dbPassword, dbHost, dbPort, dbUser)
+// 	// var catalog_server *pb.CatalogServiceServer = NewCatalogServiceServer()
+// 	server, err := NewCatalogServiceServer()
+// 	if err != nil {
+// 		log.Fatalf("Failed to initialize server: %v", err)
+// 		return
+// 	}
+
+// 	grpcServer := grpc.NewServer()
+// 	pb.RegisterCatalogServiceServer(grpcServer, server)
+
+// 	log.Println("gRPC server is running...")
+// 	if err := grpcServer.Serve(server); err != nil {
+// 		log.Fatalf("Failed to serve: %v", err)
+// 	}
+// }
+
 func main() {
 	server, err := NewCatalogServiceServer()
 	if err != nil {
@@ -120,11 +138,17 @@ func main() {
 		return
 	}
 
+	lis, err := net.Listen("tcp", ":50051")
+	if err != nil {
+		log.Fatalf("Failed to listen: %v", err)
+		return
+	}
+
 	grpcServer := grpc.NewServer()
 	pb.RegisterCatalogServiceServer(grpcServer, server)
 
 	log.Println("gRPC server is running...")
-	if err := grpcServer.Serve(server); err != nil {
+	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}
 }

@@ -5,9 +5,11 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net"
 
-	catalog "github.com/sys-internals/example-grpc/proto/catalog"
 	"google.golang.org/grpc"
+
+	pb "github.com/sys-internals/example-grpc/catalog"
 )
 
 const (
@@ -21,6 +23,21 @@ const (
 // YourCatalogServiceServer implements the CatalogServiceServer interface
 type YourCatalogServiceServer struct {
 	db *sql.DB
+}
+
+// Accept implements net.Listener.
+func (*YourCatalogServiceServer) Accept() (net.Conn, error) {
+	panic("unimplemented")
+}
+
+// Addr implements net.Listener.
+func (*YourCatalogServiceServer) Addr() net.Addr {
+	panic("unimplemented")
+}
+
+// Close implements net.Listener.
+func (*YourCatalogServiceServer) Close() error {
+	panic("unimplemented")
 }
 
 // NewCatalogServiceServer creates a new instance of YourCatalogServiceServer
@@ -37,7 +54,7 @@ func NewCatalogServiceServer() (*YourCatalogServiceServer, error) {
 	return &YourCatalogServiceServer{db: db}, nil
 }
 
-func (s *YourCatalogServiceServer) CreateCatalog(ctx context.Context, req *catalog.CreateCatalogRequest) (*catalog.Catalog, error) {
+func (s *YourCatalogServiceServer) CreateCatalog(ctx context.Context, req *pb.CreateCatalogRequest) (*pb.Catalog, error) {
 	// createSql := `
 	// create table if not exists catalog(
 	// 	id SERIAL PRIMARY KEY,
@@ -61,13 +78,13 @@ func (s *YourCatalogServiceServer) CreateCatalog(ctx context.Context, req *catal
 	}
 
 	// Return the created catalog
-	return &catalog.Catalog{
+	return &pb.Catalog{
 		Id:   catalogID,
 		Name: req.Name,
 	}, nil
 }
 
-func (s *YourCatalogServiceServer) GetCatalog(ctx context.Context, req *catalog.GetCatalogRequest) (*catalog.GetCatalogResponse, error) {
+func (s *YourCatalogServiceServer) GetCatalog(ctx context.Context, req *pb.GetCatalogRequest) (*pb.GetCatalogResponse, error) {
 	// Assuming "catalogs" table has "id" and "name" columns
 	const getCatalogQuery = "SELECT id, name FROM catalogs"
 
@@ -78,9 +95,9 @@ func (s *YourCatalogServiceServer) GetCatalog(ctx context.Context, req *catalog.
 	}
 	defer rows.Close()
 
-	var catalogs []*catalog.Catalog
+	var catalogs []*pb.Catalog
 	for rows.Next() {
-		var catalog catalog.Catalog
+		var catalog pb.Catalog
 		err := rows.Scan(&catalog.Id, &catalog.Name)
 		if err != nil {
 			log.Printf("Failed to scan row: %v", err)
@@ -90,7 +107,7 @@ func (s *YourCatalogServiceServer) GetCatalog(ctx context.Context, req *catalog.
 	}
 
 	// Return the list of catalogs
-	return &catalog.GetCatalogResponse{
+	return &pb.GetCatalogResponse{
 		Catalog: catalogs,
 	}, nil
 }
@@ -104,7 +121,7 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
-	catalog.RegisterCatalogServiceServer(grpcServer, server)
+	pb.RegisterCatalogServiceServer(grpcServer, server)
 
 	log.Println("gRPC server is running...")
 	if err := grpcServer.Serve(server); err != nil {

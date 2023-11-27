@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package catalog;
 
-option go_package = "github.com/sys-internals/example-grpc/proto/catalog";
+option go_package = "github.com/sys-internals/example-grpc/catalog";
 
 service CatalogService {
     rpc CreateCatalog (CreateCatalogRequest) returns (Catalog) {}

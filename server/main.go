@@ -6,9 +6,7 @@ import (
 	"fmt"
 	"log"
 
-	// "os"
-
-	"github.com/sys-internals/example-grpc/proto/catalog"
+	catalog "github.com/sys-internals/example-grpc/proto/catalog"
 	"google.golang.org/grpc"
 )
 
